@@ -1,17 +1,20 @@
 services:
-  app:
-    container_name: watchtower-app
+  watchtower:
+    container_name: watchtower
     image: containrrr/watchtower
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config:/etc/watchtower:ro
     environment:
       TZ: ${TZ}
       DOCKER_API_VERSION: ${DOCKER_API_VERSION}
       WATCHTOWER_CLEANUP: true
-      WATCHTOWER_SCHEDULE: 0 0 4 * * MON
-      WATCHTOWER_NOTIFICATIONS_HOSTNAME: ${HOSTNAME}
-      WATCHTOWER_NOTIFICATION_URL: ntfy://:${NTFY_TOKEN}@ntfy.${DOMAIN}/${NTFY_TOPIC}
+      WATCHTOWER_SCHEDULE: 0 0 10 * * MON
+      WATCHTOWER_NOTIFICATION_SKIP_TITLE: true
+      WATCHTOWER_NOTIFICATION_URL: ntfy://:${NTFY_TOKEN}@ntfy.${DOMAIN}/${NTFY_TOPIC}?title=Watchtower+Updates+[${HOSTNAME}]
+      WATCHTOWER_NOTIFICATION_REPORT: true
+      WATCHTOWER_NOTIFICATION_TEMPLATE_FILE: /etc/watchtower/notifcation-template.tmpl
 
 networks:
   default:

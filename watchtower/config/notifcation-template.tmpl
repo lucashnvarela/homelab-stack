@@ -1,0 +1,21 @@
+{{- if .Report -}}
+  {{- with .Report -}}
+    {{- if ( or .Updated .Restarted .Failed ) -}}
+{{len .Scanned}} containers checked, {{len .Updated}} updated, {{len .Failed}} failed
+      {{- range .Updated}}
+{{.Name}} ({{.ImageName}}): updated to {{.LatestImageID.ShortID}}
+      {{- end -}}
+      {{- range .Restarted}}
+{{.Name}} ({{.ImageName}}): {{.State}}
+      {{- end -}}
+      {{- range .Skipped}}
+{{.Name}} ({{.ImageName}}): {{.Error}}
+      {{- end -}}
+      {{- range .Failed}}
+{{.Name}} ({{.ImageName}}): {{.Error}}
+      {{- end -}}
+    {{- else if gt (len .Scanned) 0 -}}
+{{len .Scanned}} containers checked, no updates found
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
