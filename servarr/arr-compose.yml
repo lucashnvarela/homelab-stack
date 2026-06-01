@@ -45,6 +45,21 @@ services:
     depends_on:
       gluetun:
         condition: service_healthy
+    
+  profilarr:
+    container_name: profilarr
+    image: ghcr.io/dictionarry-hub/profilarr
+    restart: unless-stopped
+    volumes:
+      - /docker/profilarr/config:/config:rw
+    environment:
+      <<: *environment-defaults
+      ORIGIN: https://profilarr.${DOMAIN}
+    depends_on:
+      sonarr:
+        condition: service_healthy
+      radarr:
+        condition: service_healthy
 
   prowlarr:
     container_name: prowlarr
