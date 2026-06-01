@@ -93,6 +93,14 @@
 		}
 	}
 
+	@immich host immich.{$DOMAIN}
+	handle @immich {
+		reverse_proxy immich:2283 {
+			import reverse-proxy-healthcheck
+			health_uri /api/server/ping
+		}
+	}
+
 	@searxng host searxng.{$DOMAIN}
 	handle @searxng {
 		reverse_proxy searxng:8080 {
