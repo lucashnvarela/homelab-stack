@@ -142,6 +142,14 @@
 		}
 	}
 
+	@profilarr host profilarr.{$DOMAIN}
+	handle @profilarr {
+		reverse_proxy profilarr:6868 {
+			import reverse-proxy-healthcheck
+			health_uri /api/v1/health
+		}
+	}
+
 	@prowlarr host prowlarr.{$DOMAIN}
 	handle @prowlarr {
 		reverse_proxy gluetun:9696 {
