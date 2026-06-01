@@ -1,6 +1,7 @@
 {
 	events {
-		on unhealthy exec sh /etc/caddy/ntfy-reverse-proxy-unhealthy.sh "{event.data.host}"
+		on unhealthy exec sh /etc/caddy/ntfy-reverse-proxy-health {event.data.host} {event.name}
+		on healthy exec sh /etc/caddy/ntfy-reverse-proxy-health {event.data.host} {event.name}
 	}
 
 	acme_dns porkbun {

@@ -1,0 +1,47 @@
+#!/bin/bash
+
+if [ -z "$1" ] || [ -z "$2" ]; then
+  echo "usage: $0 <upstream> healthy|unhealthy" >&2
+  exit 1
+fi
+
+upstream="$1"
+health_status="$2"
+
+case "$health_status" in
+  healthy)
+    priority="low"
+    ;;
+  unhealthy)
+    priority="urgent"
+    ;;
+  *)
+    echo "unknown status: $health_status" >&2
+    exit 1
+    ;;
+esac
+
+health_status_label=$(echo -n "$health_status" | awk '{ print toupper(substr($0, 1, 1)) substr($0, 2) }')
+
+matcher=$(
+  awk -v upstream="$upstream" \
+  '/^[[:space:]]*handle @/ {
+    if (match($0, /@[A-Za-z0-9_-]+/)) {
+      matcher = substr($0, RSTART, RLENGTH)
+    }
+  }
+  /^[[:space:]]*reverse_proxy[[:space:]]+/ && index($0, upstream) {
+    print matcher
+    exit
+  }' \
+  /etc/caddy/Caddyfile
+)
+
+sequence_id=$(echo -n "$upstream" | sha256sum | cut -c1-12)
+
+curl -sS \
+  -H "Priority: ${priority}" \
+  -H "Title: Upstream ${health_status_label} [${HOSTNAME}]" \
+  -d "Service ${matcher:-"@unknown"} (${upstream}) health_status: ${health_status}" \
+  -u ":${NTFY_TOKEN}" \
+  "https://ntfy.${DOMAIN}/${NTFY_TOPIC}/${sequence_id}"
