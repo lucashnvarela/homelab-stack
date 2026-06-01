@@ -1,0 +1,74 @@
+x-healthcheck-parameters: &healthcheck-parameters
+  interval: 30s
+  timeout: 10s
+  start_period: 30s
+  retries: 3
+
+services:
+  immich:
+    container_name: immich
+    image: ghcr.io/immich-app/immich-server:v2.7.5
+    restart: unless-stopped
+    networks:
+      - gateway
+      - private
+    volumes:
+      - media:/data
+    environment:
+      TZ: ${TZ}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_DATABASE_NAME: ${POSTGRES_DB}
+    depends_on:
+      redis:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+
+  redis:
+    container_name: immich-redis
+    image: docker.io/valkey/valkey
+    restart: unless-stopped
+    command: valkey-server --save 60 1 --loglevel debug
+    networks:
+      - private
+    volumes:
+      - /docker/immich/redis/config:/etc/valkey:rw
+      - /docker/immich/redis/data:/data:rw
+    healthcheck:
+      test: valkey-cli ping
+      <<: *healthcheck-parameters
+
+  database:
+    container_name: immich-database
+    image: ghcr.io/immich-app/postgres:18-vectorchord0.5.3-pgvector0.8.1
+    restart: unless-stopped
+    networks:
+      - private
+    volumes:
+      - /docker/immich/database:/var/lib/postgresql:rw
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_INITDB_ARGS: --data-checksums
+    shm_size: 128mb
+    healthcheck:
+      test: pg_isready --username=${POSTGRES_USER} --dbname=${POSTGRES_DB}
+      <<: *healthcheck-parameters
+
+volumes:
+  media:
+    name: immich_smb_media
+    driver: local
+    driver_opts:
+      type: cifs
+      device: //${SMB_HOST}/${SMB_SHARE}
+      o: username=${SMB_USERNAME},password=${SMB_PASSWORD},vers=3.0,rw,noatime
+
+networks:
+  private:
+    name: immich_network
+  gateway:
+    name: gateway_network
+    external: true
