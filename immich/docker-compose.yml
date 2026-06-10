@@ -9,6 +9,8 @@ services:
     container_name: immich
     image: ghcr.io/immich-app/immich-server:v2.7.5
     restart: unless-stopped
+    devices:
+      - /dev/dri:/dev/dri
     networks:
       - gateway
       - private
@@ -52,7 +54,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_INITDB_ARGS: --data-checksums
-    shm_size: 128mb
     healthcheck:
       test: pg_isready --username=${POSTGRES_USER} --dbname=${POSTGRES_DB}
       <<: *healthcheck-parameters
