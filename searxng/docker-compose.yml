@@ -10,7 +10,7 @@ services:
     image: docker.io/searxng/searxng
     restart: unless-stopped
     networks:
-      - gateway
+      - proxy
       - private
     volumes:
       - ./config:/etc/searxng:ro
@@ -22,6 +22,10 @@ services:
     healthcheck:
       test: wget -qO- --tries=1 http://localhost:8080/healthz
       <<: *healthcheck-parameters
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.searxng.entrypoints=websecure
+      - traefik.http.services.searxng.loadbalancer.server.port=8080
     depends_on:
       valkey:
         condition: service_healthy
@@ -46,6 +50,6 @@ volumes:
 networks:
   private:
     name: searxng_network
-  gateway:
-    name: gateway_network
+  proxy:
+    name: proxy_network
     external: true

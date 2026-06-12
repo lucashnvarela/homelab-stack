@@ -17,13 +17,17 @@ services:
     network_mode: service:gluetun
     volumes:
       - /docker/sonarr/config:/config:rw
-      - media:/media:rw
+      - media:/mnt/media:rw
       - downloads:/downloads:rw
     environment:
       <<: *environment-defaults
     healthcheck:
       test: curl -fsS localhost:8989/ping
       <<: *healthcheck-parameters
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.sonarr.entrypoints=websecure
+      - traefik.http.services.sonarr.loadbalancer.server.port=8989
     depends_on:
       gluetun:
         condition: service_healthy
@@ -35,13 +39,17 @@ services:
     network_mode: service:gluetun
     volumes:
       - /docker/radarr/config:/config:rw
-      - media:/media:rw
+      - media:/mnt/media:rw
       - downloads:/downloads:rw
     environment:
       <<: *environment-defaults
     healthcheck:
       test: curl -fsS localhost:7878/ping
       <<: *healthcheck-parameters
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.radarr.entrypoints=websecure
+      - traefik.http.services.radarr.loadbalancer.server.port=7878
     depends_on:
       gluetun:
         condition: service_healthy
@@ -55,6 +63,10 @@ services:
     environment:
       <<: *environment-defaults
       ORIGIN: https://profilarr.${DOMAIN}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.profilarr.entrypoints=websecure
+      - traefik.http.services.profilarr.loadbalancer.server.port=6868
     depends_on:
       sonarr:
         condition: service_healthy
@@ -73,6 +85,10 @@ services:
     healthcheck:
       test: curl -fsS localhost:9696/ping
       <<: *healthcheck-parameters
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.prowlarr.entrypoints=websecure
+      - traefik.http.services.prowlarr.loadbalancer.server.port=9696
     depends_on:
       gluetun:
         condition: service_healthy

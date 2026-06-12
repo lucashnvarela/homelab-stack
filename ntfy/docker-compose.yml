@@ -12,7 +12,7 @@ services:
     command: serve
     init: true
     networks:
-      - gateway
+      - proxy
       - private
     volumes:
       - cache:/var/cache/ntfy:rw
@@ -21,6 +21,7 @@ services:
       NTFY_BASE_URL: https://ntfy.${DOMAIN}
       NTFY_LISTEN_HTTP: :2586
       NTFY_BEHIND_PROXY: true
+      NTFY_UPSTREAM_BASE_URL: https://ntfy.sh
       NTFY_DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
       NTFY_AUTH_DEFAULT_ACCESS: deny-all
       NTFY_ENABLE_LOGIN: true
@@ -31,6 +32,10 @@ services:
     healthcheck:
       test: wget -qO- --tries=1 http://localhost:2586/v1/health
       <<: *healthcheck-parameters
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.ntfy.entrypoints=websecure
+      - traefik.http.services.ntfy.loadbalancer.server.port=2586
     depends_on:
       database:
         condition: service_healthy
@@ -57,6 +62,6 @@ volumes:
 networks:
   private:
     name: ntfy_network
-  gateway:
-    name: gateway_network
+  proxy:
+    name: proxy_network
     external: true

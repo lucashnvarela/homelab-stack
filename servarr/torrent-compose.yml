@@ -24,6 +24,10 @@ services:
     healthcheck:
       test: curl -fsS localhost:8088/api/v2/app/version
       <<: *healthcheck-parameters
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.bittorrent.entrypoints=websecure
+      - traefik.http.services.bittorrent.loadbalancer.server.port=8088
     depends_on:
       gluetun:
         condition: service_healthy
@@ -54,6 +58,10 @@ services:
     healthcheck:
       test: curl -fsS localhost:11011/health
       <<: *healthcheck-parameters
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.cleanuparr.entrypoints=websecure
+      - traefik.http.services.cleanuparr.loadbalancer.server.port=11011
     depends_on:
       bittorrent:
         condition: service_healthy

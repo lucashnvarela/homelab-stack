@@ -16,9 +16,14 @@ services:
     volumes:
       - /docker/jellyfin/config:/config:rw
       - jellyfin_cache:/cache:rw
-      - media:/media:rw
+      - media:/mnt/media:rw
     environment:
       JELLYFIN_PublishedServerUrl: https://jellyfin.${DOMAIN}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jellyfin.entrypoints=websecure
+      - traefik.http.services.jellyfin.loadbalancer.server.port=8096
+      - traefik.http.services.jellyfin.loadbalancer.responseforwarding.flushinterval=-1
 
   seerr:
     container_name: seerr
@@ -32,6 +37,10 @@ services:
     healthcheck:
       test: wget -qO- --tries=1 http://localhost:5055/api/v1/status
       <<: *healthcheck-parameters
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.seerr.entrypoints=websecure
+      - traefik.http.services.seerr.loadbalancer.server.port=5055
     depends_on:
       jellyfin:
         condition: service_healthy
@@ -79,5 +88,5 @@ volumes:
 
 networks:
   default:
-    name: gateway_network
+    name: proxy_network
     external: true

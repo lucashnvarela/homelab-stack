@@ -18,5 +18,5 @@ services:
 
 networks:
   default:
-    name: gateway_network
+    name: proxy_network
     external: true

@@ -1,14 +1,18 @@
 services:
-  app:
-    container_name: vaultwarden-app
+  vaultwarden:
+    container_name: vaultwarden
     image: vaultwarden/server
     restart: unless-stopped
     volumes:
       - /docker/vaultwarden/app:/data:rw
     environment:
       DOMAIN: https://vwarden.${DOMAIN}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.vaultwarden.entrypoints=websecure
+      - traefik.http.services.vaultwarden.loadbalancer.server.port=80
 
 networks:
   default:
-    name: gateway_network
+    name: proxy_network
     external: true

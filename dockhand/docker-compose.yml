@@ -10,13 +10,17 @@ services:
     image: fnsys/dockhand
     restart: unless-stopped
     networks:
-      - gateway
+      - proxy
       - private
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
       - /docker/dockhand/app:/app/data:rw
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.dockhand.entrypoints=websecure
+      - traefik.http.services.dockhand.loadbalancer.server.port=3000
     depends_on:
       database:
         condition: service_healthy
@@ -40,6 +44,6 @@ services:
 networks:
   private:
     name: dockhand_network
-  gateway:
-    name: gateway_network
+  proxy:
+    name: proxy_network
     external: true
