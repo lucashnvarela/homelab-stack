@@ -27,9 +27,9 @@ entryPoints:
       tls:
         certResolver: porkbun
         domains:
-          - main: "srv-tcm710t.lhnv.dev"
+          - main: "<domain.com>"
             sans:
-              - "*.srv-tcm710t.lhnv.dev"
+              - "*.<domain.com>"
 
 certificatesResolvers:
   porkbun:
@@ -47,4 +47,4 @@ providers:
   docker:
     exposedByDefault: false
     network: proxy_network
-    defaultRule: Host(`{{ normalize .ContainerName }}.srv-tcm710t.lhnv.dev`)
+    defaultRule: Host(`{{ normalize .ContainerName }}.<domain.com>`)
