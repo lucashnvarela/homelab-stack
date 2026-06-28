@@ -1,0 +1,16 @@
+http:
+  middlewares:
+    - secure-headers:
+        headers:
+          contentTypeNosniff: true
+          contentSecurityPolicy: "default-src 'self'"
+          referrerPolicy: "strict-origin-when-cross-origin"
+          forceSTSHeader: true
+          frameDeny: false
+          customResponseHeaders:
+            Server: false
+            Via: false
+            X-Powered-By: false
+            X-Forwarded-Proto: "https"
+    - compress:
+        compress:
