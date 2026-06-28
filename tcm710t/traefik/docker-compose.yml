@@ -28,8 +28,7 @@ services:
       - traefik.enable=true
       - traefik.http.routers.dashboard.entrypoints=websecure
       - traefik.http.routers.dashboard.service=api@internal
-      - traefik.http.routers.dashboard.middlewares=auth
-      - traefik.http.middlewares.auth.basicauth.users=${DASHBOARD_CREDENTIALS}
+      - traefik.http.routers.dashboard.middlewares=dashboard-auth
 
 volumes:
   letsencrypt:
