@@ -72,6 +72,24 @@ services:
         condition: service_healthy
       radarr:
         condition: service_healthy
+  
+  bazarr:
+    container_name: bazarr
+    image: lscr.io/linuxserver/bazarr
+    restart: unless-stopped
+    network_mode: service:gluetun
+    volumes:
+      - /docker/bazarr/config:/config:rw
+      - media:/mnt/media:rw
+    environment:
+      <<: *environment-defaults
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.bazarr.entrypoints=websecure
+      - traefik.http.services.bazarr.loadbalancer.server.port=6767
+    depends_on:
+      gluetun:
+        condition: service_healthy
 
   prowlarr:
     container_name: prowlarr
