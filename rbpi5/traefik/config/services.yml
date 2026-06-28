@@ -1,0 +1,32 @@
+http:
+  routers:
+    traefik:
+      rule: "Host(`traefik.<domain.com>`)"
+      entryPoints:
+        - websecure
+      service: api@internal
+      middlewares:
+        - dashboard-auth
+
+    openwrt:
+      rule: "Host(`openwrt.<domain.com>`)"
+      entryPoints:
+        - websecure
+      service: openwrt
+
+    technitium:
+      rule: "Host(`technitium.<domain.com>`)"
+      entryPoints:
+        - websecure
+      service: technitium
+
+  services:
+    openwrt:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:<luci-http-port>"
+
+    technitium:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:5380"

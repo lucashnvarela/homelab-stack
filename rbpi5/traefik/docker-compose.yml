@@ -1,0 +1,26 @@
+x-healthcheck-parameters: &healthcheck-parameters
+  interval: 30s
+  timeout: 10s
+  start_period: 30s
+  retries: 3
+
+services:
+  traefik:
+    container_name: traefik
+    image: traefik:v3
+    restart: unless-stopped
+    command: --configFile=/config/traefik.yml
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt:rw
+      - ./config:/config:ro
+    environment:
+      PORKBUN_API_KEY: ${PORKBUN_API_KEY}
+      PORKBUN_SECRET_API_KEY: ${PORKBUN_SECRET_API_KEY}
+    healthcheck:
+      test: traefik healthcheck --ping
+      <<: *healthcheck-parameters
+
+volumes:
+  letsencrypt:

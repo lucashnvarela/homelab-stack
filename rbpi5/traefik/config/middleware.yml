@@ -1,0 +1,8 @@
+http:
+  middlewares:
+    dashboard-auth:
+      basicAuth:
+        users:
+        # use htpasswd to generate the password
+        # htpasswd -nb admin <password>
+          - "admin:password"
