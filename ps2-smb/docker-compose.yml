@@ -3,8 +3,7 @@ services:
     container_name: ps2-smb
     image: fortu/ps2smb
     restart: unless-stopped
-    ports:
-      - 446:445/tcp
+    network_mode: host
     volumes:
       - ./config:/etc/samba:ro
       - games:/games:rw
@@ -17,7 +16,3 @@ volumes:
       type: cifs
       device: //${SMB_HOST}/${SMB_SHARE}
       o: username=${SMB_USERNAME},password=${SMB_PASSWORD},vers=3.0,rw,noatime
-
-networks:
-  default:
-    name: ps2_smb_network
