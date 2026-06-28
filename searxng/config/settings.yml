@@ -6,7 +6,11 @@ search:
   favicon_resolver: 'google'
 
 server:
+  limiter: true
   image_proxy: true
+
+valkey:
+  url: valkey://valkey:6379/0
 
 ui:
   hotkeys: vim
