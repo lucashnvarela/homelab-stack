@@ -74,6 +74,7 @@ volumes:
 networks:
   private:
     name: immich_network
+    internal: true
   proxy:
     name: proxy_network
     external: true

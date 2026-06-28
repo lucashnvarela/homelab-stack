@@ -39,6 +39,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.gitea.entrypoints=websecure
+      - traefik.http.routers.gitea.rule=Host(`git.${DOMAIN}`)
       - traefik.http.services.gitea.loadbalancer.server.port=3000
     depends_on:
       database:
@@ -63,6 +64,7 @@ services:
 networks:
   private:
     name: gitea_network
+    internal: true
   proxy:
     name: proxy_network
     external: true

@@ -18,7 +18,6 @@ services:
     environment:
       SEARXNG_SECRET: ${SEARXNG_SECRET}
       SEARXNG_BASE_URL: https://searxng.${DOMAIN}
-      SEARXNG_VALKEY_URL: valkey://valkey:6379/0
     healthcheck:
       test: wget -qO- --tries=1 http://localhost:8080/healthz
       <<: *healthcheck-parameters
@@ -50,6 +49,7 @@ volumes:
 networks:
   private:
     name: searxng_network
+    internal: true
   proxy:
     name: proxy_network
     external: true
