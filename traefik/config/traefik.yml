@@ -1,0 +1,50 @@
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+log:
+  level: INFO
+
+api:
+  dashboard: true
+
+ping:
+  entryPoint: traefik
+
+entryPoints:
+  traefik:
+    address: :8080
+  web:
+    address: :80
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: :443
+    http:
+      tls:
+        certResolver: porkbun
+        domains:
+          - main: "srv-tcm710t.lhnv.dev"
+            sans:
+              - "*.srv-tcm710t.lhnv.dev"
+
+certificatesResolvers:
+  porkbun:
+    acme:
+      storage: /letsencrypt/acme.json
+      dnsChallenge:
+        provider: porkbun
+        resolvers:
+          - 1.1.1.1:53
+          - 1.0.0.1:53
+        propagation:
+          delayBeforeChecks: 60s
+
+providers:
+  docker:
+    exposedByDefault: false
+    network: proxy_network
+    defaultRule: Host(`{{ normalize .ContainerName }}.srv-tcm710t.lhnv.dev`)
