@@ -1,0 +1,48 @@
+x-healthcheck-parameters: &healthcheck-parameters
+  interval: 30s
+  timeout: 10s
+  start_period: 30s
+  retries: 3
+
+services:
+  technitium:
+    container_name: technitium
+    image: technitium/dns-server
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - /docker/technitium/config:/etc/dns:rw
+      - /docker/technitium/logs:/var/log/technitium/dns:rw
+    environment:
+      TZ: ${TZ}
+      DNS_SERVER_DOMAIN: ${DOMAIN}
+      DNS_SERVER_PREFER_IPV6: false
+      DNS_SERVER_WEB_SERVICE_ENABLE_HTTPS: false
+      DNS_SERVER_RECURSION: AllowOnlyForPrivateNetworks
+      DNS_SERVER_ENABLE_BLOCKING: false
+      DNS_SERVER_FORWARDERS: https://1.1.1.1/dns-query, https://1.0.0.1/dns-query
+      DNS_SERVER_FORWARDER_PROTOCOL: Https
+      DNS_SERVER_LOG_USING_LOCAL_TIME: true
+      DNS_SERVER_LOG_FOLDER_PATH: /var/log/technitium/dns
+    healthcheck:
+      test: dig +short +retry=0 +norecurse @127.0.0.1 cloudflare.com
+      <<: *healthcheck-parameters
+    depends_on:
+      database:
+        condition: service_healthy
+
+  database:
+    container_name: technitium-database
+    image: postgres
+    restart: unless-stopped
+    command: postgres -c listen_addresses="127.0.0.1"
+    network_mode: host
+    volumes:
+      - /docker/technitium/database:/var/lib/postgresql:rw
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: pg_isready --username=${POSTGRES_USER} --dbname=${POSTGRES_DB}
+      <<: *healthcheck-parameters
