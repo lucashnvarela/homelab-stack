@@ -48,3 +48,5 @@ providers:
     exposedByDefault: false
     network: proxy_network
     defaultRule: Host(`{{ normalize .ContainerName }}.<domain.com>`)
+  file:
+    directory: /config
