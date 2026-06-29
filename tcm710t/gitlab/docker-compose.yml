@@ -1,0 +1,32 @@
+x-healthcheck-parameters: &healthcheck-parameters
+  interval: 60s
+  timeout: 30s
+  start_period: 300s
+  retries: 5
+
+services:
+  gitlab:
+    container_name: gitlab
+    image: gitlab/gitlab-ce:latest
+    restart: unless-stopped
+    ports:
+      - 24:22/tcp
+    volumes:
+      - ./config/gitlab.rb:/etc/gitlab/gitlab.rb:ro
+      - /docker/gitlab/config:/etc/gitlab:rw
+      - /docker/gitlab/data:/var/opt/gitlab:rw
+      - /docker/gitlab/logs:/var/log/gitlab:rw
+    environment:
+      GITLAB_ROOT_PASSWORD: ${GITLAB_ROOT_PASSWORD}
+    healthcheck:
+      test: curl --fail http://localhost/-/health || exit 1
+      <<: *healthcheck-parameters
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.gitlab.entrypoints=websecure
+      - traefik.http.services.gitlab.loadbalancer.server.port=80
+
+networks:
+  default:
+    name: proxy_network
+    external: true
